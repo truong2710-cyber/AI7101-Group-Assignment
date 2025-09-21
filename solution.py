@@ -234,8 +234,8 @@ def cross_val_predict(train, test, reduced_features, Config, model_class, model_
     return test_predictions, mean_rmse
 
 # Load data
-train = pd.read_csv('train.csv')
-test = pd.read_csv('test.csv')
+train = pd.read_csv('Train.csv')
+test = pd.read_csv('Test.csv')
 
 # Remove columns with too many missing values
 train = train.loc[:, train.isnull().mean() < Config.missing_threshold]
