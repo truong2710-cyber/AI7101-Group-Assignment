@@ -10,7 +10,6 @@ from sklearn.svm import SVR
 
 from config import Config
 
-best_rmse = float("inf")  # track best score
 
 # Function to create model dict given a trial
 def create_model_dict(trial):
