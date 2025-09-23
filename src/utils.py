@@ -16,7 +16,6 @@ def prepare_submission(test, best_test_pred, save_path='output/submission.csv'):
     test[Config.target_col] = best_test_pred
     submission = test[[Config.id_col, Config.target_col]]
     submission.to_csv(save_path, index=False)
-    submission.head()
 
 def load_and_predict(test, rmse=27.84, model_names=None):
     """
