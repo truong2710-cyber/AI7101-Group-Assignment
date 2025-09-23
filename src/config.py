@@ -1,4 +1,5 @@
 class Config:
+    """Configuration parameters for the project."""
     target_col = 'pm2_5'
     n_splits = 4
     random_state = 42

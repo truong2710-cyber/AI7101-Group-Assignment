@@ -1,4 +1,9 @@
+import os
+import sys
+import warnings
+
 import pandas as pd
+import optuna
 
 from lightgbm import LGBMRegressor
 from xgboost import XGBRegressor
@@ -6,28 +11,24 @@ from catboost import CatBoostRegressor
 from sklearn.linear_model import Lasso
 from sklearn.svm import SVR
 
-import optuna
-
-import warnings
-
-import os
-import sys
+# Add the 'src' directory to the system path
 sys.path.append(os.path.abspath("src"))
 
+# Import project-specific modules
 from config import Config
 from data import create_folds, load_data, remove_high_missing_cols
 from feature_engineering import feature_engineering
 from model_selection import objective
 from models import EnsembleModel
 from utils import apply_best_params, load_and_predict, prepare_submission, save_models_and_features
+
+# Suppress warnings
 warnings.filterwarnings("ignore")
 
-pd.options.display.max_rows = 500
-pd.options.display.max_rows = 500
 
 def main():
     # Load data
-    train, test = load_data('Train.csv', 'Test.csv')
+    train, test = load_data('dataset/Train.csv', 'dataset/Test.csv')
 
     # Remove columns with too many missing values
     train, test = remove_high_missing_cols(train, test, threshold=Config.missing_threshold)
@@ -48,7 +49,7 @@ def main():
     study.set_user_attr("X", train[features])
     study.set_user_attr("y", train[Config.target_col].values)
     study.set_user_attr("folds", train['folds'].values)
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=1)
 
     # Apply best hyperparameters
     apply_best_params(study.best_params)
@@ -67,8 +68,8 @@ def main():
     final_test_preds = ensemble.predict(test[features])
 
     # Save everything
-    save_models_and_features(best_models, ensemble.reduced_features, study.best_value)
-    prepare_submission(test, final_test_preds)
+    save_models_and_features(best_models, ensemble.reduced_features, study.best_value, save_dir='weights')
+    prepare_submission(test, final_test_preds, save_path='output/submission.csv')
 
     # Load best models and save submission
     # final_test_pred = load_and_predict(test, rmse=27.84)

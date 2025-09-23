@@ -6,6 +6,15 @@ from config import Config
 
 
 def feature_engineering(train, test):
+    """Perform feature engineering on train and test datasets.
+    Args:
+        train (pd.DataFrame): Training dataset.
+        test (pd.DataFrame): Test dataset.
+    Returns:
+        train (pd.DataFrame): Transformed training dataset.
+        test (pd.DataFrame): Transformed test dataset.
+        features (list): List of features used."""
+    
     le = LabelEncoder()
     data = pd.concat([train, test])
     data['location'] = data['site_latitude'].astype('str') + '_' + data['site_longitude'].astype('str')

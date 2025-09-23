@@ -11,8 +11,13 @@ from sklearn.svm import SVR
 from config import Config
 
 
-# Function to create model dict given a trial
 def create_model_dict(trial):
+    """Create a dictionary of models with hyperparameters suggested by the trial.
+    Args:
+        trial (optuna.trial.Trial): Optuna trial object.
+    Returns:
+        dict: Dictionary of model instances with suggested hyperparameters.
+    """
     return {
         "cat": CatBoostRegressor(
             iterations=1000,
@@ -44,8 +49,13 @@ def create_model_dict(trial):
         )
     }
 
-# Optuna objective function
 def objective(trial):
+    """Objective function for Optuna hyperparameter optimization.
+    Args:
+        trial (optuna.trial.Trial): Optuna trial object.
+    Returns:
+        float: Mean RMSE from cross-validation.
+    """
     ensemble = trial.study.user_attrs["ensemble"]
     X = trial.study.user_attrs["X"]
     y = trial.study.user_attrs["y"]

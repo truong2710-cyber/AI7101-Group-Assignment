@@ -6,16 +6,13 @@ from config import Config
 
 def top_k_feature_selection(X, y, k=Config.top_features):
     """
-    Select top-k features based on CatBoost feature importance.
-    
-    Parameters
-    ----------
-    X : pd.DataFrame
-        Feature matrix
-    y : pd.Series or np.ndarray
-        Target vector
-    k : int
-        Number of top features to select
+    Select top k features based on feature importance from a CatBoostRegressor.
+    Args:
+        X (pd.DataFrame): Feature matrix.
+        y (np.ndarray): Target variable array.
+        k (int): Number of top features to select.
+    Returns:
+        list: List of top k feature names. 
     """
     model = CatBoostRegressor(**Config.cat_params)
     model.fit(X, y)
@@ -26,6 +23,13 @@ def top_k_feature_selection(X, y, k=Config.top_features):
     return top_features
 
 def drop_highly_correlated_features(X, threshold=0.9):
+    """Drop features that are highly correlated above the given threshold.
+    Args:
+        X (pd.DataFrame): Feature matrix.
+        threshold (float): Correlation threshold to drop features.
+    Returns:
+        list: List of features after dropping highly correlated ones.
+    """
     corr_matrix = X.corr().abs()
     upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper_tri.columns if any(upper_tri[column] > threshold)]

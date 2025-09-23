@@ -6,10 +6,16 @@ import numpy as np
 from config import Config
 
 
-def prepare_submission(test, best_test_pred):
-    test['pm2_5'] = best_test_pred
-    submission = test[[Config.id_col, 'pm2_5']]
-    submission.to_csv('submission.csv', index=False)
+def prepare_submission(test, best_test_pred, save_path='output/submission.csv'):
+    """Prepare submission file.
+    Args:
+        test (pd.DataFrame): Test dataset.
+        best_test_pred (np.ndarray): Predictions for the test dataset.
+        save_path (str): Path to save the submission CSV file.
+    """
+    test[Config.target_col] = best_test_pred
+    submission = test[[Config.id_col, Config.target_col]]
+    submission.to_csv(save_path, index=False)
     submission.head()
 
 def load_and_predict(test, rmse=27.84, model_names=None):
@@ -48,8 +54,15 @@ def load_and_predict(test, rmse=27.84, model_names=None):
     return final_test_pred
 
 # Save models and reduced features
-def save_models_and_features(models, reduced_features, rmse):
-    folder_name = f"./weights/{rmse:.2f}"
+def save_models_and_features(models, reduced_features, rmse, save_dir='weights'):
+    """Save models and reduced features to disk.
+    Args:
+        models (dict): Dictionary of trained models.
+        reduced_features (list): List of selected features.
+        rmse (float): RMSE value to name the folder.
+        save_dir (str): Directory to save the models and features.
+    """
+    folder_name = os.path.join(save_dir, f"{rmse:.2f}")
     os.makedirs(folder_name, exist_ok=True)
     for name, model in models.items():
         joblib.dump(model, f"{folder_name}/best_model_{name}.pkl")
@@ -58,6 +71,10 @@ def save_models_and_features(models, reduced_features, rmse):
 
 # Apply best hyperparameters to Config
 def apply_best_params(best_params):
+    """Update Config with best hyperparameters.
+    Args:
+        best_params (dict): Dictionary of best hyperparameters.
+    """
     Config.cat_params['learning_rate'] = best_params['cat_lr']
     Config.cat_params['depth'] = best_params['cat_depth']
     Config.lgb_params['learning_rate'] = best_params['lgb_lr']
