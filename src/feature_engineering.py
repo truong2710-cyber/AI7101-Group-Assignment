@@ -42,12 +42,11 @@ def feature_engineering(train, test):
     # Fill in missing values by forward and backward fill within each city and location
     nan_cols = [col for col in numerical_cols if data[col].isnull().sum() > 0 and col not in [Config.target_col, "folds"]]
     for col in nan_cols:
-        for col in nan_cols:
-            data[col] = (
-                data.groupby(["city", "location"])[col]
-                    .transform(lambda x: x.ffill().bfill())
-                    .fillna(data[col].median())  # global fallback
-                )
+        data[col] = (
+            data.groupby(["city", "location"])[col]
+                .transform(lambda x: x.ffill().bfill())
+                .fillna(data[col].median())  # global fallback
+            )
 
     # Encode categorical features
     for col in categorical_cols + ['date']:
