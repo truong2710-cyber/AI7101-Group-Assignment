@@ -68,6 +68,8 @@ class EnsembleModel:
         fold_rmse_list = []
 
         unique_folds = np.unique(folds)
+        self._feature_selection(X, y)
+
         for fold in unique_folds:
             train_idx = folds != fold
             val_idx = folds == fold
@@ -75,8 +77,7 @@ class EnsembleModel:
             X_val, y_val = X[val_idx], y[val_idx]
 
             y_train_clipped = self._clip_target(y_train)
-            self._feature_selection(X_train, y_train_clipped)
-
+            
             val_preds = np.zeros((len(X_val), len(models)))
             test_preds = np.zeros((len(X_test), len(models))) if X_test is not None else None
 
