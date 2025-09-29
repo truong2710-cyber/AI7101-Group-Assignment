@@ -2,3 +2,4 @@
 *.json
 *.pyc
 catboost_info/
+imgs/
