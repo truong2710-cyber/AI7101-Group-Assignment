@@ -4,7 +4,7 @@ from feature_selection import drop_highly_correlated_features, top_k_feature_sel
 
 
 class EnsembleModel:
-    def __init__(self, top_features=30, corr_threshold=0.9, clip_threshold=0.99):
+    def __init__(self, top_features=30, corr_threshold=0.9, clip_threshold=0.99, feature_selection_method='top_k'):
         """
         Args:
         top_features: Number of top features to select based on importance.
@@ -17,6 +17,7 @@ class EnsembleModel:
         self.models = None
         self.reduced_features = None
         self.best_params = None
+        self.feature_selection_method = feature_selection_method
 
     def _clip_target(self, y):
         """Clip target values at the specified quantile threshold.
@@ -34,7 +35,7 @@ class EnsembleModel:
             X (pd.DataFrame): Feature matrix.
             y (np.ndarray): Target variable array.
         """
-        top_feats = top_k_feature_selection(X, y, k=self.top_features)
+        top_feats = top_k_feature_selection(X, y, k=self.top_features, method=self.feature_selection_method)
         self.reduced_features = drop_highly_correlated_features(X[top_feats], threshold=self.corr_threshold)
 
     def _fit_models(self, X, y, models):
