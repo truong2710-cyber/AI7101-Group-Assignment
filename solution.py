@@ -42,6 +42,7 @@ def main():
     ensemble = EnsembleModel(top_features=Config.top_features,
                             corr_threshold=Config.corr_threshold,
                             clip_threshold=Config.clip_threshold)
+    ensemble._feature_selection(train[features], train[Config.target_col].values)
 
     # Run Optuna to find best hyperparameters
     study = optuna.create_study(direction="minimize")

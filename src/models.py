@@ -68,7 +68,6 @@ class EnsembleModel:
         fold_rmse_list = []
 
         unique_folds = np.unique(folds)
-        self._feature_selection(X, y)
 
         for fold in unique_folds:
             train_idx = folds != fold
