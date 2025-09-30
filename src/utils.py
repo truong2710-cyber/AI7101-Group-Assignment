@@ -70,17 +70,26 @@ def save_models_and_features(models, reduced_features, rmse, save_dir='weights')
         json.dump(reduced_features, f)
 
 # Apply best hyperparameters to Config
-def apply_best_params(best_params):
+def apply_best_params(best_params, models):
     """Update Config with best hyperparameters.
     Args:
         best_params (dict): Dictionary of best hyperparameters.
     """
-    Config.cat_params['learning_rate'] = best_params['cat_lr']
-    Config.cat_params['depth'] = best_params['cat_depth']
-    Config.lgb_params['learning_rate'] = best_params['lgb_lr']
-    Config.lgb_params['max_depth'] = best_params['lgb_depth']
-    Config.xgb_params['learning_rate'] = best_params['xgb_lr']   
-    Config.xgb_params['max_depth'] = best_params['xgb_depth']
-    Config.lasso_params['alpha'] = best_params['lasso_alpha']
-    Config.svr_params['C'] = best_params['svr_C']
-    Config.svr_params['epsilon'] = best_params['svr_eps']
+    if "cat" in models:
+        Config.cat_params['learning_rate'] = best_params['cat_lr']
+        Config.cat_params['depth'] = best_params['cat_depth']
+
+    if "lgb" in models:
+        Config.lgb_params['learning_rate'] = best_params['lgb_lr']
+        Config.lgb_params['max_depth'] = best_params['lgb_depth']
+
+    if "xgb" in models:
+        Config.xgb_params['learning_rate'] = best_params['xgb_lr']   
+        Config.xgb_params['max_depth'] = best_params['xgb_depth']
+
+    if "lasso" in models:
+        Config.lasso_params['alpha'] = best_params['lasso_alpha']
+
+    if "svr" in models:
+        Config.svr_params['C'] = best_params['svr_C']
+        Config.svr_params['epsilon'] = best_params['svr_eps']

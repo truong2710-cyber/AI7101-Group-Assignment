@@ -75,7 +75,7 @@ def main(args):
     study.optimize(objective, n_trials=5)
 
     # Apply best hyperparameters
-    apply_best_params(study.best_params)
+    apply_best_params(study.best_params, args.models)
 
     # Define final models using best hyperparameters
     best_models = {}
