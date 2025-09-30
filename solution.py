@@ -38,6 +38,8 @@ def arg_parser():
     parser.add_argument("--not_use_date", default=False, action='store_true')
     parser.add_argument("--not_use_unify", default=False, action='store_true')
     parser.add_argument("--not_use_cloud_diff", default=False, action='store_true')
+    parser.add_argument("--scale_target", default=False, action='store_true')
+    parser.add_argument("--clip_target", default=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
@@ -58,7 +60,9 @@ def main(args):
     ensemble = EnsembleModel(top_features=Config.top_features,
                             corr_threshold=Config.corr_threshold,
                             clip_threshold=Config.clip_threshold,
-                            feature_selection_method=args.feature_selection_method)
+                            feature_selection_method=args.feature_selection_method,
+                            scale_target=args.scale_target,
+                            clip_target=args.clip_target)
     ensemble._feature_selection(train[features], train[Config.target_col].values)
 
     # Run Optuna to find best hyperparameters

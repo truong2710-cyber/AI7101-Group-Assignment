@@ -4,12 +4,16 @@ from feature_selection import drop_highly_correlated_features, top_k_feature_sel
 
 
 class EnsembleModel:
-    def __init__(self, top_features=30, corr_threshold=0.9, clip_threshold=0.99, feature_selection_method='top_k'):
+    def __init__(self, top_features=30, corr_threshold=0.9, clip_threshold=0.99,\
+                         feature_selection_method='top_k', scale_target=False, clip_target=False):
         """
         Args:
         top_features: Number of top features to select based on importance.
         corr_threshold: Threshold to drop highly correlated features.
         clip_threshold: Quantile threshold to clip target variable.
+        feature_selection_method: Method to select top features.
+        scale_target: Whether to scale target variable.
+        clip_target: Whether to clip target variable.
         """
         self.top_features = top_features
         self.corr_threshold = corr_threshold
@@ -18,6 +22,8 @@ class EnsembleModel:
         self.reduced_features = None
         self.best_params = None
         self.feature_selection_method = feature_selection_method
+        self.scale_target = scale_target
+        self.clip_target = clip_target
 
     def _clip_target(self, y):
         """Clip target values at the specified quantile threshold.
@@ -26,8 +32,14 @@ class EnsembleModel:
         Returns:
             np.ndarray: Clipped target variable array.
         """
-        clip_val = np.quantile(y, self.clip_threshold)
-        return np.where(y >= clip_val, clip_val, y)
+        if self.scale_target:
+            y = np.log1p(y)
+
+        if self.clip_target:
+            clip_val = np.quantile(y, self.clip_threshold)
+            return np.where(y >= clip_val, clip_val, y)
+        else:
+            return y
 
     def _feature_selection(self, X, y):
         """Select top features and drop highly correlated ones.
@@ -122,4 +134,7 @@ class EnsembleModel:
         test_preds = np.zeros((len(X), len(self.models)))
         for i, (name, model) in enumerate(self.models.items()):
             test_preds[:, i] = model.predict(X[self.reduced_features])
+            if self.scale_target:
+                test_preds[:, i] = np.exp(test_preds[:, i]) - 1
+
         return np.mean(test_preds, axis=1)
