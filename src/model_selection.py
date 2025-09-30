@@ -11,43 +11,50 @@ from sklearn.svm import SVR
 from config import Config
 
 
-def create_model_dict(trial):
+def create_model_dict(trial, models):
     """Create a dictionary of models with hyperparameters suggested by the trial.
     Args:
         trial (optuna.trial.Trial): Optuna trial object.
     Returns:
         dict: Dictionary of model instances with suggested hyperparameters.
     """
-    return {
-        "cat": CatBoostRegressor(
+
+    model_dict = {}
+    if "cat" in models:
+        model_dict["cat"] = CatBoostRegressor(
             iterations=1000,
             learning_rate=trial.suggest_float('cat_lr', 0.01, 0.1, log=True),
             depth=trial.suggest_int('cat_depth', 4, 10),
             random_seed=Config.random_state,
             verbose=0,
             early_stopping_rounds=250
-        ),
-        "lgb": LGBMRegressor(
+        )
+    if "lgb" in models:
+        model_dict["lgb"] = LGBMRegressor(
             n_estimators=100,
             learning_rate=trial.suggest_float('lgb_lr', 0.01, 0.1, log=True),
             max_depth=trial.suggest_int('lgb_depth', 3, 12),
             random_state=Config.random_state,
             verbosity=-1
-        ),
-        "xgb": XGBRegressor(
+        )
+    if "xgb" in models:
+        model_dict["xgb"] = XGBRegressor(
             n_estimators=100,
             learning_rate=trial.suggest_float('xgb_lr', 0.01, 0.1, log=True),
             max_depth=trial.suggest_int('xgb_depth', 3, 12),
             random_state=Config.random_state,
             objective='reg:squarederror'
-        ),
-        "lasso": Lasso(alpha=trial.suggest_float('lasso_alpha', 1e-4, 1.0, log=True),
-                       random_state=Config.random_state),
-        "svr": SVR(
+        )
+    if "lasso" in models:
+        model_dict["lasso"] = Lasso(alpha=trial.suggest_float('lasso_alpha', 1e-4, 1.0, log=True),
+                       random_state=Config.random_state)
+    if "svr" in models:
+        model_dict["svr"] = SVR(
             C=trial.suggest_float('svr_C', 0.1, 10.0, log=True),
             epsilon=trial.suggest_float('svr_eps', 0.01, 1.0, log=True)
         )
-    }
+    return model_dict
+   
 
 def objective(trial):
     """Objective function for Optuna hyperparameter optimization.
@@ -60,8 +67,9 @@ def objective(trial):
     X = trial.study.user_attrs["X"]
     y = trial.study.user_attrs["y"]
     folds = trial.study.user_attrs["folds"]
+    models = trial.study.user_attrs["models"]
 
-    models = create_model_dict(trial)
+    models = create_model_dict(trial, models)
     _, _, mean_rmse = ensemble.cross_val_fit(
         X,
         y,

@@ -34,10 +34,10 @@ def arg_parser():
     parser.add_argument("--clip_threshold", type=float, default=None)
     parser.add_argument("--models", type=str, default='cat,lgb,xgb,lasso,svr')
     parser.add_argument("--feature_selection_method", type=str, default='catboost')
-    parser.add_argument("--not_use_location", default=False, action='store_true')
-    parser.add_argument("--not_use_date", default=False, action='store_true')
-    parser.add_argument("--not_use_unify", default=False, action='store_true')
-    parser.add_argument("--not_use_cloud_diff", default=False, action='store_true')
+    parser.add_argument("--drop_location", default=False, action='store_true')
+    parser.add_argument("--augment_date", default=False, action='store_true')
+    parser.add_argument("--use_unify", default=False, action='store_true')
+    parser.add_argument("--use_cloud_diff", default=False, action='store_true')
     parser.add_argument("--scale_target", default=False, action='store_true')
     parser.add_argument("--clip_target", default=False, action='store_true')
     return parser.parse_args()
@@ -54,12 +54,12 @@ def main(args):
     train = create_folds(train)
 
     # Feature engineering
-    train, test, features = feature_engineering(train, test, use_location=not args.not_use_location, use_date=not args.not_use_date, \
-                                            use_unify=not args.not_use_unify, use_cloud_diff=not args.not_use_cloud_diff)
+    train, test, features = feature_engineering(train, test, drop_location=args.drop_location, augment_date=args.augment_date, \
+                                            use_unify=args.use_unify, use_cloud_diff=args.use_cloud_diff)
 
-    ensemble = EnsembleModel(top_features=Config.top_features,
-                            corr_threshold=Config.corr_threshold,
-                            clip_threshold=Config.clip_threshold,
+    ensemble = EnsembleModel(top_features=args.top_features,
+                            corr_threshold=args.corr_threshold,
+                            clip_threshold=args.clip_threshold,
                             feature_selection_method=args.feature_selection_method,
                             scale_target=args.scale_target,
                             clip_target=args.clip_target)
@@ -71,6 +71,7 @@ def main(args):
     study.set_user_attr("X", train[features])
     study.set_user_attr("y", train[Config.target_col].values)
     study.set_user_attr("folds", train['folds'].values)
+    study.set_user_attr("models", args.models)
     study.optimize(objective, n_trials=5)
 
     # Apply best hyperparameters

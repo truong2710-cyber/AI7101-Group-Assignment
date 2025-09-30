@@ -49,7 +49,7 @@ def unify_with_majority(df, new_col='sensor_zenith_angle', decimals=3):
     df = df.drop(columns=src_cols)
     return df
 
-def feature_engineering(train, test, use_location=False, use_date=False, use_unify=False, use_cloud_diff=False):
+def feature_engineering(train, test, drop_location=False, augment_date=False, use_unify=False, use_cloud_diff=False):
     """Perform feature engineering on train and test datasets.
     Args:
         train (pd.DataFrame): Training dataset.
@@ -62,11 +62,11 @@ def feature_engineering(train, test, use_location=False, use_date=False, use_uni
     le = LabelEncoder()
     data = pd.concat([train, test])
 
-    if use_location:
+    if drop_location:
+        data = data.sort_values(by = ['city', 'date', 'hour'])
+    else:
         data['location'] = data['site_latitude'].astype('str') + '_' + data['site_longitude'].astype('str')
         data = data.sort_values(by = ['city','location', 'date', 'hour'])
-    else:
-        data = data.sort_values(by = ['city', 'date', 'hour'])
 
     categorical_cols = data.select_dtypes(include='object').columns.tolist()
     categorical_cols = [col for col in categorical_cols if col not in ['date', 'id', 'city', 'country']]
@@ -74,7 +74,7 @@ def feature_engineering(train, test, use_location=False, use_date=False, use_uni
 
     # Date features
     data['date'] = pd.to_datetime(data['date'])
-    if use_date:
+    if augment_date:
         data['month'] = data['date'].dt.month
         data['week'] = data['date'].dt.isocalendar().week
         data['day'] = data['date'].dt.day
@@ -102,18 +102,18 @@ def feature_engineering(train, test, use_location=False, use_date=False, use_uni
     # Fill in missing values by forward and backward fill within each city and location
     nan_cols = [col for col in numerical_cols if data[col].isnull().sum() > 0 and col not in [Config.target_col, "folds"]]
     for col in nan_cols:
-        if use_location:
-            data[col] = (
-                data.groupby(["city", "location"])[col]
-                        .transform(lambda x: x.ffill().bfill())
-                        .fillna(data[col].median())  # global fallback
-                    )
-        else:
+        if drop_location:
             data[col] = (
                 data.groupby(["city"])[col]
                     .transform(lambda x: x.ffill().bfill())
                     .fillna(data[col].median())  # global fallback
                 )
+        else:
+            data[col] = (
+                data.groupby(["city", "location"])[col]
+                        .transform(lambda x: x.ffill().bfill())
+                        .fillna(data[col].median())  # global fallback
+                    )
 
     # Special case: Cloud has base vs top pressure/height, which are highly correlated.
     # Create a new feature to capture the difference.

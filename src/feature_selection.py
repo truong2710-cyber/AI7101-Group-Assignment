@@ -63,6 +63,9 @@ def top_k_feature_selection(X, y, k=Config.top_features, method='catboost'):
         # Select top-k features
         top_features = [f for f, score in feature_scores[:k]]
         return top_features
+        
+    elif method == 'all':
+        return X.columns.tolist()
 
     else:
         raise ValueError(f"Invalid selection method: {method}")
