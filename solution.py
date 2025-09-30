@@ -52,12 +52,10 @@ def main(args):
     # Feature engineering
     train, test, features = feature_engineering(train, test, use_location=not args.not_use_location, use_date=not args.not_use_date)
 
-    top_features = args.top_features if args.top_features else Config.top_features
-    corr_threshold = args.corr_threshold if args.corr_threshold else Config.corr_threshold
-    ensemble = EnsembleModel(top_features=top_features,
-                            corr_threshold=corr_threshold,
-                            clip_threshold=Config.clip_threshold,
-                            feature_selection_method=args.feature_selection_method)
+    ensemble = EnsembleModel(top_features=Config.top_features,
+                            corr_threshold=Config.corr_threshold,
+                            clip_threshold=Config.clip_threshold)
+    ensemble._feature_selection(train[features], train[Config.target_col].values)
 
     # Run Optuna to find best hyperparameters
     study = optuna.create_study(direction="minimize")
