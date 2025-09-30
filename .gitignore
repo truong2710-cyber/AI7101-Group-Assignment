@@ -2,4 +2,6 @@
 *.json
 *.pyc
 catboost_info/
+weights/
 imgs/
+__pycache__/

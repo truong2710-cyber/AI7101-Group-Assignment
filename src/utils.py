@@ -62,6 +62,7 @@ def save_models_and_features(models, reduced_features, rmse, save_dir='weights')
         save_dir (str): Directory to save the models and features.
     """
     folder_name = os.path.join(save_dir, f"{rmse:.2f}")
+    print(f"Saving models and features to {folder_name}")
     os.makedirs(folder_name, exist_ok=True)
     for name, model in models.items():
         joblib.dump(model, f"{folder_name}/best_model_{name}.pkl")

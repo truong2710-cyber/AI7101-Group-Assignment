@@ -40,6 +40,24 @@ def remove_high_missing_cols(train, test, threshold=Config.missing_threshold):
         train (pd.DataFrame): Training dataset with high-missing columns removed.
         test (pd.DataFrame): Test dataset with high-missing columns removed.
     """
-    train = train.loc[:, train.isnull().mean() < threshold]
-    test = test.loc[:, test.isnull().mean() < threshold]  
+    before_removing_columns = train.columns
+    null_percentages = train.isnull().mean()
+    train = train.loc[:, null_percentages < threshold]
+    after_removing_columns = train.columns
+    removed_columns = set(before_removing_columns) - set(after_removing_columns)
+    if removed_columns:
+        removed_null_percentages = null_percentages[list(removed_columns)]
+        print(f"Null percentage of removed columns:")
+        print(removed_null_percentages)
+        print(f"Number of removed columns: {len(removed_columns)}")
+        print(f"Columns removed: {list(removed_columns)}")
+
+    if removed_columns:
+        # Get columns to keep in test (all columns except the ones removed from train)
+        test_columns_to_keep = [col for col in test.columns if col not in removed_columns]
+        test = test[test_columns_to_keep]
+        print(f"Test columns after removing same columns as train: {len(test.columns)}")
+    else:
+        print("No columns removed from test (no columns were removed from train)")
+        
     return train, test
