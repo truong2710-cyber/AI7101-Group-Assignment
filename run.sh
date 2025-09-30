@@ -40,13 +40,13 @@ python solution.py --exp_name model_svr_cat --missing_threshold 1.0 --top_featur
 
 
 python solution.py --exp_name model_svr_cat_lgb --missing_threshold 1.0 --top_features 1000 --corr_threshold 1.0 \
-                    --clip_threshold 1.0 --models svr,cat,lgb --feature_selection_method top_k
+                    --clip_threshold 1.0 --models svr,cat,lgb --feature_selection_method all
                     
 python solution.py --exp_name model_svr_cat_lgb_xgb --missing_threshold 1.0 --top_features 1000 --corr_threshold 1.0 \
-                    --clip_threshold 1.0 --models svr,cat,lgb,xgb --feature_selection_method top_k
+                    --clip_threshold 1.0 --models svr,cat,lgb,xgb --feature_selection_method all
                     
 python solution.py --exp_name model_svr_cat_lgb_xgb_lasso --missing_threshold 1.0 --top_features 1000 --corr_threshold 1.0 \
-                    --clip_threshold 1.0 --models svr,cat,lgb,xgb,lasso --feature_selection_method top_k
+                    --clip_threshold 1.0 --models svr,cat,lgb,xgb,lasso --feature_selection_method all
 
 # Hyperparameter tuning
 python solution.py --exp_name tunning_top_features_40 --missing_threshold 1.0 --top_features 40 --corr_threshold 1.0 \

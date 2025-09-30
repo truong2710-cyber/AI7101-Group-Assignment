@@ -4,6 +4,7 @@ import warnings
 
 import pandas as pd
 import optuna
+import numpy as np
 
 from lightgbm import LGBMRegressor
 from xgboost import XGBRegressor
@@ -66,7 +67,7 @@ def main(args):
     ensemble._feature_selection(train[features], train[Config.target_col].values)
 
     # Run Optuna to find best hyperparameters
-    study = optuna.create_study(direction="minimize")
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=Config.random_state))
     study.set_user_attr("ensemble", ensemble)
     study.set_user_attr("X", train[features])
     study.set_user_attr("y", train[Config.target_col].values)
