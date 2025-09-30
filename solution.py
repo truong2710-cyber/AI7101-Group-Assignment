@@ -36,6 +36,8 @@ def arg_parser():
     parser.add_argument("--feature_selection_method", type=str, default='catboost')
     parser.add_argument("--not_use_location", default=False, action='store_true')
     parser.add_argument("--not_use_date", default=False, action='store_true')
+    parser.add_argument("--not_use_unify", default=False, action='store_true')
+    parser.add_argument("--not_use_cloud_diff", default=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
@@ -50,11 +52,13 @@ def main(args):
     train = create_folds(train)
 
     # Feature engineering
-    train, test, features = feature_engineering(train, test, use_location=not args.not_use_location, use_date=not args.not_use_date)
+    train, test, features = feature_engineering(train, test, use_location=not args.not_use_location, use_date=not args.not_use_date, \
+                                            use_unify=not args.not_use_unify, use_cloud_diff=not args.not_use_cloud_diff)
 
     ensemble = EnsembleModel(top_features=Config.top_features,
                             corr_threshold=Config.corr_threshold,
-                            clip_threshold=Config.clip_threshold)
+                            clip_threshold=Config.clip_threshold,
+                            feature_selection_method=args.feature_selection_method)
     ensemble._feature_selection(train[features], train[Config.target_col].values)
 
     # Run Optuna to find best hyperparameters

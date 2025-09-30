@@ -49,7 +49,7 @@ def unify_with_majority(df, new_col='sensor_zenith_angle', decimals=3):
     df = df.drop(columns=src_cols)
     return df
 
-def feature_engineering(train, test, use_location=False, use_date=False):
+def feature_engineering(train, test, use_location=False, use_date=False, use_unify=False, use_cloud_diff=False):
     """Perform feature engineering on train and test datasets.
     Args:
         train (pd.DataFrame): Training dataset.
@@ -90,9 +90,14 @@ def feature_engineering(train, test, use_location=False, use_date=False):
     print(f'Numerical columns: {numerical_cols}')
     
     # Unify features with majority voting
-    unify_cols = ['sensor_zenith_angle', 'sensor_azimuth_angle', 'solar_zenith_angle', 'solar_azimuth_angle','altitude']
-    for col in unify_cols:
-        data = unify_with_majority(data, new_col=col)
+    if use_unify:
+        unify_cols = ['sensor_zenith_angle', 'sensor_azimuth_angle', 'solar_zenith_angle', 'solar_azimuth_angle','altitude']
+        for col in unify_cols:
+            data = unify_with_majority(data, new_col=col)
+
+        print(f'Numerical columns before unify: {len(numerical_cols)}')
+        numerical_cols = [col for col in numerical_cols if col in data.columns]
+        print(f'Numerical columns after unify: {len(numerical_cols)}')
 
     # Fill in missing values by forward and backward fill within each city and location
     nan_cols = [col for col in numerical_cols if data[col].isnull().sum() > 0 and col not in [Config.target_col, "folds"]]
@@ -112,9 +117,10 @@ def feature_engineering(train, test, use_location=False, use_date=False):
 
     # Special case: Cloud has base vs top pressure/height, which are highly correlated.
     # Create a new feature to capture the difference.
-    data['cloud_cloud_diff_pressure'] = data['cloud_cloud_top_pressure'] - data['cloud_cloud_base_pressure']
-    data['cloud_cloud_diff_height'] = data['cloud_cloud_top_height'] - data['cloud_cloud_base_height']
-    
+    if use_cloud_diff:
+        data['cloud_cloud_diff_pressure'] = data['cloud_cloud_top_pressure'] - data['cloud_cloud_base_pressure']
+        data['cloud_cloud_diff_height'] = data['cloud_cloud_top_height'] - data['cloud_cloud_base_height']
+        
     # Encode categorical features
     for col in categorical_cols + ['date']:
         data[col] = le.fit_transform(data[col])
