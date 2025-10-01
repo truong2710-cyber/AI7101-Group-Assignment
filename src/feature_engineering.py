@@ -1,4 +1,3 @@
-# Feature engineering
 import pandas as pd
 import numpy as np
 from sklearn.calibration import LabelEncoder
@@ -19,7 +18,7 @@ def unify_with_majority(df, new_col='sensor_zenith_angle', decimals=3):
     if not src_cols:
         return df
 
-    # force numeric for row_majority function
+    # Force numeric for row_majority function
     src_raw = df[src_cols].apply(pd.to_numeric, errors='coerce')
     src_rnd = src_raw.round(decimals)
 
@@ -35,17 +34,17 @@ def unify_with_majority(df, new_col='sensor_zenith_angle', decimals=3):
         tops = sorted([v for v, k in cnt.items() if k == maxc])
         chosen_r = tops[0]
 
-        # median of original values corresponding to the chosen rounded value
+        # Median of original values corresponding to the chosen rounded value
         mask = (src_rnd.iloc[i] == chosen_r) & src_raw.iloc[i].notna()
         cand = src_raw.iloc[i][mask].values
         if cand.size:
             return float(np.median(cand))
-        # fallback: first value
+        # Fallback: first value
         return float(raw.iloc[0]) if not raw.empty else np.nan
 
     df[new_col] = [row_majority(i) for i in range(len(df))]
 
-    # drop source columns
+    # Drop source columns
     df = df.drop(columns=src_cols)
     return df
 
