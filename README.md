@@ -17,7 +17,7 @@ Competition on [Zindi](https://zindi.africa/competitions/airqo-african-air-quali
 
 `output`: stores .csv files per run for submission.
 
-`solution.py`: main file for execution of the whole ML pipeline, including preparing a file for submission
+`solution.py`: main file for execution of the whole ML pipeline, including preparing a file for submission.
 
 ## Script for training, validation, and producing test file
 ```bash
